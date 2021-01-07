@@ -1,7 +1,8 @@
 import * as express from 'express';
-import Database from  './configuration/database'
 import * as  bodyParser from 'body-parser';
+import * as cors from 'cors'
 
+import Database from  './configuration/database'
 import TiposDeDadosController from './controller/tiposDeDadosController'
 import NegociosController from './controller/negociosController'
 import CamposPadroesController from './controller/camposPadroesController'
@@ -19,7 +20,17 @@ class StartUp{
         this.routes();
     }
 
+    enableCors(){
+        const options: cors.CorsOptions = {
+            methods: "GET,OPTIONS,PUT,POST,DELETE,PATCH",
+            origin: "*"
+        }
+
+        this.app.use(cors(options)); 
+    }
+
     middler(){
+        this.enableCors();
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: false}));
     }
@@ -30,7 +41,7 @@ class StartUp{
         })
         
         //tiposDeDados
-        this.app.route('/api/v1/tipos-de-Dados').get(TiposDeDadosController.get);
+        this.app.route('/api/v1/tipos-de-dados').get(TiposDeDadosController.get);
         this.app.route('/api/v1/tipos-de-dados').post(TiposDeDadosController.create);
 
         //negocios

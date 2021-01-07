@@ -6,7 +6,7 @@ class TiposDeDadosController {
     get(req, res){
         
         TiposDeDadosService.get()
-            .then(tipos => res.status(HttpStatus.OK).json({result: tipos}))
+            .then(tipos => res.status(HttpStatus.OK).json({data: tipos}))
             .catch(error => console.error.bind(console,`Error ${error}`));
     } 
 
@@ -15,7 +15,7 @@ class TiposDeDadosController {
         let tipoDeDado = req.body;
 
         TiposDeDadosService.create(tipoDeDado)
-            .then(tipo => res.status(HttpStatus.CREATED).json({result: tipo}))
+            .then(tipo => res.status(HttpStatus.CREATED).json({data: tipo}))
             .catch(error => console.error.bind(console,`Error ${error}`));
     }
 }
