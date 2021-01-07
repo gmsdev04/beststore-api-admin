@@ -18,7 +18,7 @@ class NegociosServices{
     }
 
     patchById(_id, negocioAtualizado){
-        return NegociosRepository.findOneAndUpdate(_id,negocioAtualizado,{new: true});
+        return NegociosRepository.findByIdAndUpdate(_id,negocioAtualizado,{new: true});
     }
 }
 

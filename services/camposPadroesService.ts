@@ -19,7 +19,7 @@ class CamposPadroesService {
     }
 
     patchById(_id, campoPadraoAtualizacao){
-        return CamposPadroesRepository.findOneAndUpdate(_id,campoPadraoAtualizacao,{new: true});
+        return CamposPadroesRepository.findByIdAndUpdate(_id,campoPadraoAtualizacao,{new: true});
     }
 }
 
