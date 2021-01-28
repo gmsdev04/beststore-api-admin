@@ -15,7 +15,7 @@ class NegociosServices {
         return negociosRepository_1.default.findByIdAndDelete(_id);
     }
     patchById(_id, negocioAtualizado) {
-        return negociosRepository_1.default.findOneAndUpdate(_id, negocioAtualizado, { new: true });
+        return negociosRepository_1.default.findByIdAndUpdate(_id, negocioAtualizado, { new: true });
     }
 }
 exports.default = new NegociosServices();

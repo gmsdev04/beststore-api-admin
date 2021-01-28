@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const database_1 = require("./configuration/database");
 const bodyParser = require("body-parser");
+const cors = require("cors");
+const database_1 = require("./configuration/database");
 const tiposDeDadosController_1 = require("./controller/tiposDeDadosController");
 const negociosController_1 = require("./controller/negociosController");
 const camposPadroesController_1 = require("./controller/camposPadroesController");
@@ -14,7 +15,15 @@ class StartUp {
         this.middler();
         this.routes();
     }
+    enableCors() {
+        const options = {
+            methods: "GET,OPTIONS,PUT,POST,DELETE,PATCH",
+            origin: "*"
+        };
+        this.app.use(cors(options));
+    }
     middler() {
+        this.enableCors();
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: false }));
     }
@@ -23,7 +32,7 @@ class StartUp {
             res.send({ versao: '0.0.1' });
         });
         //tiposDeDados
-        this.app.route('/api/v1/tipos-de-Dados').get(tiposDeDadosController_1.default.get);
+        this.app.route('/api/v1/tipos-de-dados').get(tiposDeDadosController_1.default.get);
         this.app.route('/api/v1/tipos-de-dados').post(tiposDeDadosController_1.default.create);
         //negocios
         this.app.route('/api/v1/negocios').get(negociosController_1.default.get);

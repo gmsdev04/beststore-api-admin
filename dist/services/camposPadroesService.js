@@ -15,7 +15,7 @@ class CamposPadroesService {
         return camposPadroesRepository_1.default.findByIdAndDelete(_id);
     }
     patchById(_id, campoPadraoAtualizacao) {
-        return camposPadroesRepository_1.default.findOneAndUpdate(_id, campoPadraoAtualizacao, { new: true });
+        return camposPadroesRepository_1.default.findByIdAndUpdate(_id, campoPadraoAtualizacao, { new: true });
     }
 }
 exports.default = new CamposPadroesService();
