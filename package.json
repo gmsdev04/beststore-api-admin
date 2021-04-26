@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "tsc -w",
-    "start": "node ./dist/program.js"
+    "start": "nodemon ./dist/program.js"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +18,7 @@
     "express": "^4.17.1",
     "http-status": "^1.5.0",
     "mongoose": "^5.11.10",
+    "nodemon": "^2.0.7",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },

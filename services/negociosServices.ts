@@ -5,6 +5,10 @@ class NegociosServices{
         return NegociosRepository.find({});
     }   
     
+    getByAtivo(ativo : Boolean){
+        return NegociosRepository.find({ "ativo": status})
+    }
+
     create(novoNegocio){
         return NegociosRepository.create(novoNegocio);
     }

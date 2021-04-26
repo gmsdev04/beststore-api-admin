@@ -9,6 +9,14 @@ class NegociosController {
         .catch(error => console.error.bind(console,`Error ${error}`));
     }
 
+    getByAtivo(req : Request,res : Response){
+        
+        NegociosServices.getByAtivo(req.query.ativo)
+        .then(negocio => res.status(HttpStatus.OK).json({data : negocio}))
+        .catch(error => console.error.bind(console,`Error ${error}`));
+    }
+
+
     post(req : Request, res : Response){
         let novoNegocio = req.body;
         
