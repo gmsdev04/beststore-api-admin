@@ -1,29 +1,37 @@
-import NegociosRepository from '../repository/negociosRepository'
+import { injectable, inject } from 'inversify';
+import INegociosRepository from '../repository/INegociosRepository';
 
+@injectable()
 class NegociosServices{
+    private repository: INegociosRepository;
+
+    constructor( @inject("INegociosRepository") private _repository: INegociosRepository ) {
+        this.repository = _repository;
+    }
+
     get(){
-        return NegociosRepository.find({});
+        return this.repository.getAll();
     }   
     
     getByAtivo(ativo : Boolean){
-        return NegociosRepository.find({ "ativo": status})
+        return this.repository.getByAtivo(ativo);
     }
 
     create(novoNegocio){
-        return NegociosRepository.create(novoNegocio);
+        return this.repository.create(novoNegocio);
     }
 
-    getById(_id){
-        return NegociosRepository.findById(_id);
+    getById(id){
+        return this.repository.getById(id);
     }
 
-    deleteById(_id){
-        return NegociosRepository.findByIdAndDelete(_id);
+    deleteById(id){
+        return this.repository.deleteById(id)
     }
 
-    patchById(_id, negocioAtualizado){
-        return NegociosRepository.findByIdAndUpdate(_id,negocioAtualizado,{new: true});
+    patchById(id, negocioAtualizado){
+        return this.repository.updateById(id,negocioAtualizado);
     }
 }
 
-export default new NegociosServices();
+export default NegociosServices;

@@ -1,51 +1,41 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const express = require("express");
+require("reflect-metadata");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const database_1 = require("./configuration/database");
-const tiposDeDadosController_1 = require("./controller/tiposDeDadosController");
-const negociosController_1 = require("./controller/negociosController");
-const camposPadroesController_1 = require("./controller/camposPadroesController");
+const inversify_express_utils_1 = require("inversify-express-utils");
+const inversify_1 = require("inversify");
+const negociosRepositoryMongoDb_1 = require("./repository/impl/negociosRepositoryMongoDb");
+//CONTROLLERS
+const negociosServices_1 = require("./services/negociosServices");
+require('./controller/negociosController');
 class StartUp {
     constructor() {
-        this.app = express();
+        this.container = new inversify_1.Container();
+        this.server = new inversify_express_utils_1.InversifyExpressServer(this.container);
         this._db = new database_1.default();
         this._db.createConnection();
-        this.middler();
-        this.routes();
+        this.configureServer();
+        this.configureDependencyInjection();
     }
-    enableCors() {
+    configureServer() {
+        this.server.setConfig((app) => {
+            app.use(bodyParser.urlencoded({ extended: false }));
+            app.use(bodyParser.json());
+            this.enableCors(app);
+        });
+    }
+    configureDependencyInjection() {
+        this.container.bind('INegociosRepository').to(negociosRepositoryMongoDb_1.default);
+        this.container.bind('NegociosServices').to(negociosServices_1.default);
+    }
+    enableCors(app) {
         const options = {
             methods: "GET,OPTIONS,PUT,POST,DELETE,PATCH",
             origin: "*"
         };
-        this.app.use(cors(options));
-    }
-    middler() {
-        this.enableCors();
-        this.app.use(bodyParser.json());
-        this.app.use(bodyParser.urlencoded({ extended: false }));
-    }
-    routes() {
-        this.app.route('/').get((req, res) => {
-            res.send({ versao: '0.0.1' });
-        });
-        //tiposDeDados
-        this.app.route('/api/v1/tipos-de-dados').get(tiposDeDadosController_1.default.get);
-        this.app.route('/api/v1/tipos-de-dados').post(tiposDeDadosController_1.default.create);
-        //negocios
-        this.app.route('/api/v1/negocios').get(negociosController_1.default.get);
-        this.app.route('/api/v1/negocios').post(negociosController_1.default.post);
-        this.app.route('/api/v1/negocios/:id').get(negociosController_1.default.getById);
-        this.app.route('/api/v1/negocios/:id').patch(negociosController_1.default.patchById);
-        this.app.route('/api/v1/negocios/:id').delete(negociosController_1.default.deleteById);
-        //campos-padroes
-        this.app.route('/api/v1/campos-padroes').get(camposPadroesController_1.default.get);
-        this.app.route('/api/v1/campos-padroes').post(camposPadroesController_1.default.post);
-        this.app.route('/api/v1/campos-padroes/:id').get(camposPadroesController_1.default.getById);
-        this.app.route('/api/v1/campos-padroes/:id').patch(camposPadroesController_1.default.patchById);
-        this.app.route('/api/v1/campos-padroes/:id').delete(camposPadroesController_1.default.deleteById);
+        app.use(cors(options));
     }
 }
 exports.default = new StartUp();

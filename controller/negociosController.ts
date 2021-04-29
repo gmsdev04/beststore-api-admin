@@ -1,56 +1,66 @@
-import * as HttpStatus from 'http-status'
 import NegociosServices from '../services/negociosServices'
-import { Request, Response } from 'express';
+import { BaseHttpController, controller, httpDelete, httpGet, httpPatch, httpPost, queryParam, requestBody, requestParam } from 'inversify-express-utils';
+import { inject } from 'inversify';
 
-class NegociosController {
-    get(req : Request,res : Response){
-        NegociosServices.get()
-        .then(negocio => res.status(HttpStatus.OK).json({data : negocio}))
-        .catch(error => console.error.bind(console,`Error ${error}`));
+@controller('/api/v1/negocios')
+class NegociosController extends BaseHttpController{
+
+    private service : NegociosServices;
+
+    constructor(@inject('NegociosServices') _service : NegociosServices){
+        super();
+        this.service = _service;
     }
 
-    getByAtivo(req : Request,res : Response){
+    @httpGet('')
+    async get(@queryParam('ativo') ativo: Boolean){
+
+        //FILTER BY ATIVO
+        if(ativo != undefined){
+            return await this.service.getByAtivo(ativo)
+            .then(negocio => this.ok({data : negocio}))
+            .catch(error => console.error.bind(console,`Error ${error}`));
+        }
+        //GET ALL
+        return await this.service.get()
+            .then(negocio => this.ok({data : negocio}))
+            .catch(error => console.error.bind(console,`Error ${error}`));
+    }
+
+    @httpPost('')
+    async post(@requestBody() novoNegocio : any){
         
-        NegociosServices.getByAtivo(req.query.ativo)
-        .then(negocio => res.status(HttpStatus.OK).json({data : negocio}))
+        return await this.service.create(novoNegocio)
+        .then(negocio => this.created(`/api/v1/negocios/${negocio._id}`,{data : negocio}))
         .catch(error => console.error.bind(console,`Error ${error}`));
     }
 
+    @httpGet('/:id')
+    async getById(@requestParam('id') id : string){
+       
+        return await this.service.getById(id)
+        .then(negocio => this.ok({data : negocio}))
+        .catch(error => console.error.bind(console,`Error ${error}`));
+    }
 
-    post(req : Request, res : Response){
-        let novoNegocio = req.body;
+    @httpDelete('/:id')
+    async deleteById(@requestParam('id') id : string){
+
+        return await this.service.deleteById(id)
+        .then(() => this.ok({message : "Deletado com sucesso"}))
+        .catch(error => console.error.bind(console,`Error ${error}`));
+    }
+
+    @httpPatch('/:id')
+    async patchById(@requestParam('id') id : string, @requestBody() negocioAtualizado : any){
         
-        NegociosServices.create(novoNegocio)
-        .then(negocio => res.status(HttpStatus.CREATED).json({data : negocio}))
-        .catch(error => console.error.bind(console,`Error ${error}`));
-    }
+        console.log('negocioAtualizado', negocioAtualizado);
 
-    getById(req : Request, res : Response){
-        let _id = req.params.id;
-
-        NegociosServices.getById(_id)
-        .then(negocio => res.status(HttpStatus.OK).json({data : negocio}))
-        .catch(error => console.error.bind(console,`Error ${error}`));
-    }
-
-    deleteById(req : Request, res : Response){
-        let _id = req.params.id;
-
-        NegociosServices.deleteById(_id)
-        .then(() => res.status(HttpStatus.OK).json({message : "Deletado com sucesso"}))
-        .catch(error => console.error.bind(console,`Error ${error}`));
-    }
-
-
-    patchById(req : Request, res : Response){
-        let _id = req.params.id;
-        let negocioAtualizado = req.body;
-
-        NegociosServices.patchById(_id,negocioAtualizado)
-        .then(negocio => res.status(HttpStatus.OK).json({data : negocio}))
+        return await this.service.patchById(id,negocioAtualizado)
+        .then(negocio => this.ok({data : negocio}))
         .catch(error => console.error.bind(console,`Error ${error}`));
     }
 
 }
 
-export default new NegociosController();
+export default NegociosController;

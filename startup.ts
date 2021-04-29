@@ -1,64 +1,53 @@
-import * as express from 'express';
+import "reflect-metadata";
 import * as  bodyParser from 'body-parser';
 import * as cors from 'cors'
-
 import Database from  './configuration/database'
-import TiposDeDadosController from './controller/tiposDeDadosController'
-import NegociosController from './controller/negociosController'
-import CamposPadroesController from './controller/camposPadroesController'
+import { InversifyExpressServer, TYPE } from 'inversify-express-utils';
+import { Container } from 'inversify';
+import { Application } from "express";
+import INegociosRepository from './repository/INegociosRepository';
+import NegociosRepositoryMongoDb from './repository/impl/negociosRepositoryMongoDb';
+
+//CONTROLLERS
+import NegociosServices from './services/negociosServices';
+
+require('./controller/negociosController')
 
 class StartUp{
-    public app: express.Application;
+    public server: InversifyExpressServer;
     private _db : Database;
-    private bodyParser;
+    private container : Container
 
     constructor(){
-        this.app = express();
+        this.container = new Container();
+        this.server =  new InversifyExpressServer(this.container);
         this._db = new Database();
         this._db.createConnection();
-        this.middler();
-        this.routes();
+        this.configureServer();
+        this.configureDependencyInjection();
     }
 
-    enableCors(){
+    configureServer(){
+        this.server.setConfig((app) =>{
+            app.use(bodyParser.urlencoded({ extended: false}));
+            app.use(bodyParser.json());
+            this.enableCors(app);
+        })
+    }
+
+    configureDependencyInjection(){
+        this.container.bind<INegociosRepository>('INegociosRepository').to(NegociosRepositoryMongoDb);
+        this.container.bind<NegociosServices>('NegociosServices').to(NegociosServices);
+    }
+
+    enableCors(app : Application){
         const options: cors.CorsOptions = {
             methods: "GET,OPTIONS,PUT,POST,DELETE,PATCH",
             origin: "*"
         }
-
-        this.app.use(cors(options)); 
+        app.use(cors(options)); 
     }
 
-    middler(){
-        this.enableCors();
-        this.app.use(bodyParser.json());
-        this.app.use(bodyParser.urlencoded({ extended: false}));
-    }
-
-    routes(){
-        this.app.route('/').get((req,res) => {
-            res.send({ versao: '0.0.1'})
-        })
-        
-        //tiposDeDados
-        this.app.route('/api/v1/tipos-de-dados').get(TiposDeDadosController.get);
-        this.app.route('/api/v1/tipos-de-dados').post(TiposDeDadosController.create);
-
-        //negocios
-        this.app.route('/api/v1/negocios').get(NegociosController.get);
-        this.app.route('/api/v1/negocios').post(NegociosController.post);
-        this.app.route('/api/v1/negocios/:id').get(NegociosController.getById);
-        this.app.route('/api/v1/negocios/:id').patch(NegociosController.patchById);
-        this.app.route('/api/v1/negocios/:id').delete(NegociosController.deleteById);
-
-        //campos-padroes
-        this.app.route('/api/v1/campos-padroes').get(CamposPadroesController.get);
-        this.app.route('/api/v1/campos-padroes').post(CamposPadroesController.post);
-        this.app.route('/api/v1/campos-padroes/:id').get(CamposPadroesController.getById);
-        this.app.route('/api/v1/campos-padroes/:id').patch(CamposPadroesController.patchById);
-        this.app.route('/api/v1/campos-padroes/:id').delete(CamposPadroesController.deleteById);
-        
-    }
 
 }
 
